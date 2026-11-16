@@ -227,6 +227,11 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
 }
 .team svg { width: 1.2rem; height: 1.2rem; overflow: visible; fill: var(--c); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
 .team.out { color: var(--muted); font-weight: 500; background: transparent; border-color: var(--rule); box-shadow: none; }
+/* состав команды — виден только по ссылке с ключом */
+.roster { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .1rem .85rem; margin: .1rem 0 0; padding: 0; list-style: none; font-size: .84rem; font-weight: 500; color: var(--muted); }
+.roster a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.roster a:hover { color: var(--ink); text-decoration-color: var(--ink); }
+.roster a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 3px; }
 .soon { margin-top: 1.1rem; padding: .9rem 1rem; color: var(--muted); font-size: .95rem; border: 2px dashed var(--rule); border-radius: 12px; }
 
 .socks {
@@ -334,7 +339,9 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
     return n + ' ' + (a === 1 && b !== 11 ? 'команда' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'команды' : 'команд');
   }
 
-  function fill(n, names, next) {
+  DEMO.rosters = Object.fromEntries(DEMO.stage1.map(name => [name, [1, 2, 3, 4].map(k => ({ nick: 'Игрок ' + k, steam: '' }))]));
+
+  function fill(n, names, next, rosters) {
     const list = document.querySelector('[data-stage="' + n + '"]');
     const empty = document.querySelector('[data-empty="' + n + '"]');
     const count = document.querySelector('[data-count="' + n + '"]');
@@ -354,6 +361,25 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
           li.classList.add('out');
         }
       }
+      const players = rosters && rosters[name];
+      if (players && players.length) {
+        const ul = document.createElement('ul');
+        ul.className = 'roster';
+        players.forEach(p => {
+          const it = document.createElement('li');
+          const nick = String(p.nick || '').trim() || '—';
+          if (/^https:\/\/(steamcommunity\.com|s\.team)\//.test(p.steam || '')) {
+            const a = document.createElement('a');
+            a.href = p.steam; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = nick;
+            it.append(a);
+          } else {
+            it.textContent = nick;
+          }
+          ul.append(it);
+        });
+        li.append(ul);
+      }
       list.append(li);
     });
     list.hidden = !names.length;
@@ -366,15 +392,18 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
     state.hidden = true;
     if (d.hidden || !Array.isArray(d.stage1)) { closed.hidden = false; stages.hidden = true; banner.hidden = true; return; }
     closed.hidden = true;
-    fill(1, d.stage1 || [], d.stage2);
-    fill(2, d.stage2 || [], d.stage3);
-    fill(3, d.stage3 || [], null);
+    fill(1, d.stage1 || [], d.stage2, d.rosters);
+    fill(2, d.stage2 || [], d.stage3, d.rosters);
+    fill(3, d.stage3 || [], null, d.rosters);
     stages.hidden = false;
     if (d.demo) {
       banner.innerHTML = '<b>Это пример.</b> Команды выдуманные — так страница будет выглядеть, когда в таблице появятся заявки и галочки.';
       banner.hidden = false;
     } else if (!d.open) {
       banner.innerHTML = '<b>Сейчас сетку видишь только ты</b> — по ссылке с ключом. Для остальных страница закрыта.';
+      banner.hidden = false;
+    } else if (d.rosters) {
+      banner.innerHTML = '<b>Составы команд видишь только ты</b> — по ссылке с ключом. Остальным видны только названия.';
       banner.hidden = false;
     } else {
       banner.hidden = true;
