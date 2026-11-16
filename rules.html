@@ -26,20 +26,20 @@ window.RULES = {
     { label: 'Перки 2-го тира', sprite: 's2-kperks.webp', n: 4, perk: true },
     { label: 'Перки 1-го тира', sprite: 's3-kperks.webp', n: 82, perk: true, fold: true }
   ],
-  's1-surv-perks':   { pages: ['s1-surv-1.webp', 's1-surv-2.webp'] },
+  's1-surv-perks':   { sprite: 's1-sperks.webp', n: 48, perk: true },
   's2-killers':      { sprite: 's2-killers.webp', n: 13 },
   // маньяк 2-го тира: перки 1-го и 2-го тира
   's2-killer-perks': [
     { label: 'Перки 2-го тира', sprite: 's2-kperks.webp', n: 4, perk: true },
     { label: 'Перки 1-го тира', sprite: 's3-kperks.webp', n: 82, perk: true, fold: true }
   ],
-  's2-surv-perks':   { pages: ['s2-surv-1.webp', 's2-surv-2.webp', 's2-surv-3.webp'] },
+  's2-surv-perks':   { sprite: 's2-sperks.webp', n: 62, perk: true },
   's3-killers':      { sprite: 's3-killers.webp', n: 2 },
   // маньяк 1-го тира: только перки 1-го тира
   's3-killer-perks': [
     { label: 'Перки 1-го тира', sprite: 's3-kperks.webp', n: 82, perk: true }
   ],
-  's3-surv-perks':   { pages: ['s3-surv-1.webp', 's3-surv-2.webp', 's3-surv-3.webp'] }
+  's3-surv-perks':   { sprite: 's3-sperks.webp', n: 71, perk: true }
 };
 </script>
 
@@ -378,7 +378,7 @@ h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
       <span class="num" aria-hidden="true">2</span>
       <div>
         <h2 id="st2">Этап 2</h2>
-        <p>Маньяк играет на киллере 2-го тира.</p>
+        <p>Против вас маньяк 2-го тира.</p>
       </div>
     </div>
     <div class="group"><h3>Маньяки 2-го тира</h3><div class="set" data-list="s2-killers"></div></div>
