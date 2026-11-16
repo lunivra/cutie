@@ -20,24 +20,25 @@
 <script>
 window.RULES = {
   's1-killers':      { sprite: 's1-killers.webp', n: 12 },
-  // маньяк 3-го тира: перки всех трёх тиров. В ленте тира 3 клетки 1–4 повторяют тир 2, поэтому берём только клетку 0
+  // Перки маньяка на странице идут одним общим списком, без деления по тирам.
+  // Этап 1 (маньяк 3-го тира): 82 + 4 + 1. В ленте s1-kperks клетки 1–4 повторяют s2-kperks, поэтому берём только клетку 0
   's1-killer-perks': [
-    { label: 'Перки 3-го тира', sprite: 's1-kperks.webp', n: 5, only: [0], perk: true },
-    { label: 'Перки 2-го тира', sprite: 's2-kperks.webp', n: 4, perk: true },
-    { label: 'Перки 1-го тира', sprite: 's3-kperks.webp', n: 82, perk: true, fold: true }
+    { sprite: 's3-kperks.webp', n: 82, perk: true },
+    { sprite: 's2-kperks.webp', n: 4, perk: true },
+    { sprite: 's1-kperks.webp', n: 5, only: [0], perk: true }
   ],
   's1-surv-perks':   { sprite: 's1-sperks.webp', n: 48, perk: true },
   's2-killers':      { sprite: 's2-killers.webp', n: 13 },
-  // маньяк 2-го тира: перки 1-го и 2-го тира
+  // Этап 2 (маньяк 2-го тира): 82 + 4
   's2-killer-perks': [
-    { label: 'Перки 2-го тира', sprite: 's2-kperks.webp', n: 4, perk: true },
-    { label: 'Перки 1-го тира', sprite: 's3-kperks.webp', n: 82, perk: true, fold: true }
+    { sprite: 's3-kperks.webp', n: 82, perk: true },
+    { sprite: 's2-kperks.webp', n: 4, perk: true }
   ],
   's2-surv-perks':   { sprite: 's2-sperks.webp', n: 62, perk: true },
   's3-killers':      { sprite: 's3-killers.webp', n: 2 },
-  // маньяк 1-го тира: только перки 1-го тира
+  // Этап 3 (маньяк 1-го тира): 82
   's3-killer-perks': [
-    { label: 'Перки 1-го тира', sprite: 's3-kperks.webp', n: 82, perk: true }
+    { sprite: 's3-kperks.webp', n: 82, perk: true }
   ],
   's3-surv-perks':   { sprite: 's3-sperks.webp', n: 71, perk: true }
 };
@@ -278,31 +279,6 @@ h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
 .tiles.perks { grid-template-columns: repeat(auto-fill, minmax(clamp(2.9rem, 8.5vw, 3.6rem), 1fr)); }
 .tiles.perks .tile { max-width: 4rem; border-radius: 12px; }
 
-/* перки маньяка собраны из нескольких тиров: подпись тира над каждой группой, большая группа сворачивается */
-.lead { margin: -.45rem 0 1rem; color: var(--muted); }
-.sub { margin: 1.2rem 0 .7rem; font-size: .9rem; font-weight: 700; }
-.set > .sub:first-child { margin-top: 0; }
-.fold { margin-top: 1.3rem; }
-.fold > summary {
-  display: inline-flex;
-  align-items: center;
-  gap: .6rem;
-  padding: .5rem 1rem;
-  font-size: .92rem;
-  font-weight: 700;
-  cursor: pointer;
-  list-style: none;
-  background: var(--white);
-  border: 2.5px solid var(--ink);
-  border-radius: 999px;
-  box-shadow: 3px 3px 0 var(--c);
-}
-.fold > summary::-webkit-details-marker { display: none; }
-.fold > summary::after { content: "показать"; font-weight: 500; color: var(--muted); }
-.fold[open] > summary::after { content: "свернуть"; }
-.fold[open] > summary { margin-bottom: 1rem; }
-.fold > summary:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
-
 /* листы перков выживших — скрины из игры в рамке-наклейке; по нажатию открываются крупно */
 .shots { display: grid; gap: 1rem; }
 .shots.pages { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
@@ -429,7 +405,7 @@ h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
       </div>
     </div>
     <div class="group"><h3>Маньяки 3-го тира</h3><div class="set" data-list="s1-killers"></div></div>
-    <div class="group"><h3>Разрешённые перки маньяка</h3><p class="lead">Маньяк 3-го тира может играть с перками всех трёх тиров.</p><div class="set" data-list="s1-killer-perks"></div></div>
+    <div class="group"><h3>Разрешённые перки маньяка</h3><div class="set" data-list="s1-killer-perks"></div></div>
     <div class="group">
       <h3>Разрешённые перки выживших</h3>
       <div class="set" data-list="s1-surv-perks"></div>
@@ -446,7 +422,7 @@ h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
       </div>
     </div>
     <div class="group"><h3>Маньяки 2-го тира</h3><div class="set" data-list="s2-killers"></div></div>
-    <div class="group"><h3>Разрешённые перки маньяка</h3><p class="lead">Маньяк 2-го тира может играть с перками 1-го и 2-го тира.</p><div class="set" data-list="s2-killer-perks"></div></div>
+    <div class="group"><h3>Разрешённые перки маньяка</h3><div class="set" data-list="s2-killer-perks"></div></div>
     <div class="group">
       <h3>Разрешённые перки выживших</h3>
       <div class="set" data-list="s2-surv-perks"></div>
@@ -463,7 +439,7 @@ h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
       </div>
     </div>
     <div class="group"><h3>Маньяки 1-го тира</h3><div class="set" data-list="s3-killers"></div></div>
-    <div class="group"><h3>Разрешённые перки маньяка</h3><p class="lead">Маньяк 1-го тира играет только с перками 1-го тира.</p><div class="set" data-list="s3-killer-perks"></div></div>
+    <div class="group"><h3>Разрешённые перки маньяка</h3><div class="set" data-list="s3-killer-perks"></div></div>
     <div class="group">
       <h3>Разрешённые перки выживших</h3>
       <div class="set" data-list="s3-surv-perks"></div>
@@ -495,32 +471,25 @@ h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
       return;
     }
     if (groups) {
+      // несколько лент подряд складываются в один общий список
+      const grid = document.createElement('div');
+      grid.className = 'tiles' + (groups[0].perk ? ' perks' : '');
+      let total = 0;
       groups.forEach(g => {
         const idx = g.only || Array.from({ length: g.n }, (_, i) => i);   // only — какие клетки ленты показывать
-        const grid = document.createElement('div');
-        grid.className = 'tiles' + (g.perk ? ' perks' : '');
-        grid.style.setProperty('--n', g.n);
-        grid.setAttribute('role', 'img');
-        grid.setAttribute('aria-label', (g.label || title) + ': ' + idx.length);
         idx.forEach(i => {
           const t = document.createElement('span');
           t.className = 'tile';
+          t.style.setProperty('--n', g.n);
           t.style.setProperty('--i', i);
           t.style.backgroundImage = 'url("' + g.sprite + '")';
           grid.append(t);
         });
-        if (g.fold) {
-          const d = document.createElement('details'); d.className = 'fold';
-          const s = document.createElement('summary'); s.textContent = g.label + ' · ' + idx.length;
-          d.append(s, grid); box.append(d);
-        } else {
-          if (g.label) {
-            const p = document.createElement('p'); p.className = 'sub'; p.textContent = g.label + ' · ' + idx.length;
-            box.append(p);
-          }
-          box.append(grid);
-        }
+        total += idx.length;
       });
+      grid.setAttribute('role', 'img');
+      grid.setAttribute('aria-label', title + ': ' + total);
+      box.append(grid);
       return;
     }
     const files = conf.pages;
