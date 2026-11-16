@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CUTIE — регистрация команд на турнир Lunivra</title>
+<meta name="description" content="Регистрация команд на турнир CUTIE по Dead by Daylight от Lunivra: название команды, четыре игрока и их профили Steam.">
+<meta property="og:title" content="CUTIE — турнир Lunivra по Dead by Daylight">
+<meta property="og:description" content="Dead by Daylight. Одна заявка — одна команда из четырёх игроков.">
+<meta name="theme-color" content="#cdf23f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23cdf23f'/%3E%3Cpath d='M16 26C8 20 5 16.500 5 12c0-3.300 2.500-5.500 5.400-5.500 2.200 0 4.100 1.200 5.600 3.300 1.500-2.100 3.400-3.300 5.600-3.300C24.500 6.500 27 8.700 27 12c0 4.500-3 8-11 14z' fill='%23ff5fa2' stroke='%23161616' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Rubik:wght@400;500;700;800&display=swap">
+
+<!-- ───────────── НАСТРОЙКА ─────────────
+     endpoint — адрес веб-приложения Google Apps Script (заканчивается на /exec).
+     Пока он пустой, заявки никуда не отправляются. -->
+<script>
+window.TOURNAMENT = {
+  endpoint: 'https://script.google.com/macros/s/AKfycbywXV_dYE6tCLooiDdoJhY77q0vM9-A3D4TeR5MqffmtvTMwFYNbidi2nVbkpiSEWVz2A/exec'
+};
+</script>
+
+<style>
+/* Замысел: страница как панель с Twitch-канала Lunivra — лаймовое поле, наклейки с толстым
+   чёрным контуром и жёсткой тенью, каракули. Название турнира — пять букв-наклеек;
+   у каждого из четырёх игроков свой цвет, место «закрашивается», когда игрок вписан. */
+:root {
+  color-scheme: light;
+  --lime: #cdf23f;
+  --lime-hot: #c6fc30;
+  --ink: #161616;
+  --cream: #fff7e8;
+  --white: #ffffff;
+  --pink: #ff5fa2;
+  --orange: #ff8a1f;
+  --peri: #8f9cf5;
+  --green: #3c7d3f;
+  --focus: #5b6cf0;
+  --red: #c9181f;
+  --muted: #5d5a4d;
+  --rule: #d3cab4;
+  --display: 'Bagel Fat One', 'Rubik', system-ui, sans-serif;
+  --text: 'Rubik', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { height: 100%; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-x: clip;
+  font: 400 1rem/1.5 var(--text);
+  color: var(--ink);
+  background: radial-gradient(rgba(22, 22, 22, .1) 1.6px, transparent 2.1px) 0 0 / 24px 24px var(--lime);
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding-block: clamp(1.75rem, 6vw, 3.75rem) 3.5rem;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+}
+
+/* ── Каракули ── */
+.d { position: absolute; overflow: visible; fill: var(--c, var(--pink)); stroke: var(--ink); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; transform: rotate(var(--r, 0deg)); }
+.d.wave { fill: none; }
+.d.wave .o { stroke: var(--ink); stroke-width: 6.5; }
+.d.wave .i { stroke: var(--c, var(--peri)); stroke-width: 2.8; }
+.bob { animation: bob 5s ease-in-out infinite; }
+.bob.slow { animation-duration: 7s; animation-delay: -2s; }
+@keyframes bob { 50% { transform: translateY(-7px) rotate(calc(var(--r, 0deg) + 6deg)); } }
+
+.doodles { position: absolute; inset: 0; pointer-events: none; }
+.d-heart { --r: 14deg; right: 1%; top: 3.1rem; width: clamp(2.6rem, 10vw, 4.2rem); }
+.d-star { --c: var(--orange); --r: -12deg; right: 3%; top: 7rem; width: clamp(2rem, 8vw, 3.2rem); }
+.d-spark { --c: var(--cream); right: 31%; top: .9rem; width: 1.7rem; }
+.d-wave { --r: -8deg; right: 0; bottom: 2.6rem; width: 5.5rem; }
+@media (min-width: 40rem) {
+  .d-heart { top: 2rem; }
+  .d-star { right: 13%; top: 62%; }
+}
+@media (max-width: 39.99rem) {
+  .d-spark, .d-wave { display: none; }
+  .d-heart { top: 2.7rem; }
+  .d-star { right: 5%; top: 6.05rem; width: 1.7rem; }
+}
+
+.side { position: fixed; inset: 0; pointer-events: none; z-index: 0; display: none; }
+@media (min-width: 72rem) {
+  .side { display: block; }
+  .s1 { --c: var(--cream); left: calc(50% - 35rem); top: 14%; width: 3rem; }
+  .s2 { --c: var(--peri); --r: -16deg; left: calc(50% - 38rem); top: 58%; width: 5.5rem; }
+  .s3 { --c: var(--pink); --r: 18deg; left: calc(50% + 28rem); top: 36%; width: 6rem; }
+  .s4 { --c: var(--orange); --r: 12deg; left: calc(50% + 27rem); top: 78%; width: 7rem; }
+}
+
+/* ── Шапка ── */
+.head { position: relative; padding-bottom: clamp(1.6rem, 5vw, 2.4rem); }
+.eyebrow {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding: .45rem .85rem;
+  font: 700 .72rem/1.25 var(--text);
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--ink);
+  border-radius: 999px;
+  transform: rotate(-2deg);
+}
+h1 {
+  position: relative;
+  margin: .55rem 0 .5rem;
+  font: 400 clamp(4.6rem, 23vw, 10.5rem)/1 var(--display);
+  white-space: nowrap;
+}
+h1 span {
+  display: inline-block;
+  color: var(--c);
+  -webkit-text-stroke: .05em var(--ink);
+  paint-order: stroke fill;
+  text-shadow: .045em .05em 0 var(--ink);
+  transform: rotate(var(--r));
+  animation: pop .55s cubic-bezier(.3, 1.6, .5, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+h1 span + span { margin-left: .025em; }
+@keyframes pop { from { transform: scale(.2) rotate(calc(var(--r) * -3)); opacity: 0; } }
+.lede { position: relative; margin: 0; max-width: 29rem; font-size: 1.1rem; font-weight: 500; line-height: 1.4; }
+.places {
+  display: inline-block;
+  margin: 1rem 0 0;
+  padding: .3rem .75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* ── Лист с формой ── */
+.sheet {
+  position: relative;
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: clamp(1.2rem, 4.5vw, 2.25rem);
+}
+label { display: block; margin-bottom: .4rem; font: 500 .85rem/1.3 var(--text); color: var(--muted); }
+input {
+  width: 100%;
+  font: 500 1rem/1.3 var(--text);
+  color: var(--ink);
+  background: var(--white);
+  border: 2.5px solid var(--ink);
+  border-radius: 12px;
+  padding: .75rem .85rem;
+  transition: box-shadow .12s, transform .12s;
+}
+input::placeholder { color: #9a9686; font-weight: 400; }
+input:focus-visible { outline: none; background: #f5f6ff; box-shadow: 4px 4px 0 var(--focus); transform: translate(-1px, -1px); }
+input[aria-invalid="true"] { border-color: var(--red); box-shadow: 4px 4px 0 #f3b4ae; }
+input[aria-invalid="true"]:focus-visible { box-shadow: 4px 4px 0 var(--red); }
+.err { margin: .5rem 0 0; font-size: .87rem; font-weight: 500; line-height: 1.35; color: var(--red); }
+.err:empty { display: none; }
+.trap { position: absolute; left: -200vw; width: 1px; height: 1px; overflow: hidden; }
+
+#team { font: 800 clamp(1.4rem, 5.5vw, 1.9rem)/1.2 var(--text); border-width: 3px; border-radius: 14px; padding: .7rem .9rem; }
+#team::placeholder { font-weight: 500; }
+
+.squad { margin-top: 2.25rem; }
+.squad-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .3rem 1.5rem; margin-bottom: .8rem; }
+h2 { margin: 0; font: 800 1.6rem/1.1 var(--text); }
+.squad-head p { margin: 0; font-size: .92rem; color: var(--muted); }
+
+details.hint { margin-bottom: 1.1rem; font-size: .94rem; }
+details.hint summary { cursor: pointer; width: fit-content; font-weight: 500; text-decoration: underline wavy var(--pink); text-decoration-thickness: 2px; text-underline-offset: .32em; }
+details.hint summary:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 6px; }
+details.hint p { margin: .8rem 0 0; max-width: 36rem; color: var(--muted); }
+code { font: 500 .95em var(--text); color: var(--ink); background: var(--lime); padding: .05em .3em; border-radius: 5px; overflow-wrap: anywhere; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+.slots { list-style: none; margin: 0; padding: 0; }
+.slot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.2rem 0 1.3rem;
+  border-top: 2px dashed var(--rule);
+}
+.slot:nth-child(1) { --c: var(--pink); }
+.slot:nth-child(2) { --c: var(--orange); }
+.slot:nth-child(3) { --c: var(--peri); }
+.slot:nth-child(4) { --c: var(--lime-hot); }
+.seat {
+  --p: 0;
+  width: 2.75rem;
+  aspect-ratio: 1;
+  margin-top: 1.5rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--white) 0);
+}
+.seat b { font: 800 1.15rem/1 var(--text); }
+.slot.ready .seat { box-shadow: 3px 3px 0 var(--ink); transform: rotate(-8deg); animation: stamp .4s cubic-bezier(.3, 1.7, .5, 1); }
+@keyframes stamp { from { transform: scale(.55) rotate(14deg); } }
+.fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: .9rem; min-width: 0; }
+.field { min-width: 0; }
+@media (max-width: 36rem) {
+  .fields { grid-template-columns: minmax(0, 1fr); }
+  .slot { gap: .8rem; }
+  .seat { width: 2.3rem; }
+  .seat b { font-size: 1rem; }
+}
+
+/* ── Готовность и отправка ── */
+.fire {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.1rem 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px dashed var(--rule);
+}
+.ready-line { display: flex; align-items: center; gap: .75rem; margin: 0; font-weight: 500; }
+.hearts { display: flex; gap: .25rem; }
+.hearts svg { width: 1.55rem; height: 1.55rem; overflow: visible; fill: var(--white); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; transition: fill .2s, transform .25s cubic-bezier(.3, 1.7, .5, 1); }
+.hearts svg.on { fill: var(--pink); transform: scale(1.12) rotate(-8deg); }
+.all-ready .ready-line { font-weight: 800; }
+button { font: 800 1rem/1.2 var(--text); color: var(--ink); cursor: pointer; border: 3px solid var(--ink); border-radius: 14px; transition: transform .1s, box-shadow .1s; }
+button:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+.go { padding: 1rem 1.6rem; font-size: 1.05rem; background: var(--pink); box-shadow: 5px 5px 0 var(--ink); }
+.go:hover { transform: translate(-1px, -1px); box-shadow: 7px 7px 0 var(--ink); }
+.go:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--ink); }
+.go[disabled] { background: #e9e1cd; cursor: progress; transform: none; box-shadow: 5px 5px 0 var(--ink); }
+.form-err { flex: 1 1 100%; margin: 0; font-weight: 500; color: var(--red); }
+.form-err:empty { display: none; }
+@media (max-width: 36rem) {
+  .go { flex: 1 1 100%; padding-inline: .8rem; font-size: 1rem; }
+}
+
+/* ── Итог и «закрыто» ── */
+.panel h2 { font-size: clamp(1.7rem, 6.5vw, 2.4rem); text-wrap: balance; overflow-wrap: anywhere; }
+.panel h2:focus { outline: none; }
+.panel p { margin: .9rem 0 0; max-width: 34rem; }
+.badge {
+  display: inline-block;
+  padding: .3rem .8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: var(--orange);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-3deg);
+  animation: stamp .45s cubic-bezier(.3, 1.7, .5, 1);
+}
+.roster { list-style: none; margin: 1.4rem 0 0; padding: 0; counter-reset: seat; }
+.roster li { counter-increment: seat; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0 .8rem; align-items: center; padding: .7rem 0; border-top: 2px dashed var(--rule); }
+.roster li::before {
+  content: counter(seat);
+  grid-row: span 2;
+  width: 2rem; aspect-ratio: 1;
+  display: grid; place-items: center;
+  font: 800 .95rem/1 var(--text);
+  background: var(--c);
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+}
+.roster li:nth-child(1) { --c: var(--pink); }
+.roster li:nth-child(2) { --c: var(--orange); }
+.roster li:nth-child(3) { --c: var(--peri); }
+.roster li:nth-child(4) { --c: var(--lime-hot); }
+.roster .nick { font-weight: 700; overflow-wrap: anywhere; }
+.roster .link { font-size: .88rem; color: var(--muted); overflow-wrap: anywhere; }
+.again { margin-top: 1.6rem; padding: .8rem 1.2rem; background: var(--white); box-shadow: 4px 4px 0 var(--ink); }
+.again:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--ink); }
+.again:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+
+/* Полосатая кайма — как чулки на панелях канала */
+.socks {
+  position: relative;
+  z-index: 1;
+  height: calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 3px solid var(--ink);
+  background: repeating-linear-gradient(90deg, var(--ink) 0 22px, var(--green) 22px 44px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="i-heart" d="M12 20.500C5.500 15.600 3 12.600 3 9c0-2.700 2-4.600 4.500-4.600 1.800 0 3.300 1 4.500 2.700 1.200-1.700 2.700-2.700 4.500-2.700C19 4.400 21 6.300 21 9c0 3.600-2.500 6.600-9 11.500z"/>
+    <path id="i-star" d="M12 2.500l2.700 6.100 6.700.7-5 4.500 1.400 6.600L12 17l-5.800 3.400 1.400-6.600-5-4.500 6.700-.7z"/>
+    <path id="i-spark" d="M12 2c.9 5.600 3.400 8.100 10 10-6.600 1.900-9.100 4.400-10 10-.9-5.600-3.400-8.100-10-10 6.600-1.900 9.100-4.400 10-10z"/>
+    <path id="i-wave" d="M3 8q4.500-9 9 0t9 0 9 0 9 0 9 0 9 0"/>
+  </defs>
+</svg>
+
+<div class="side" aria-hidden="true">
+  <svg class="d s1 bob slow" viewBox="0 0 24 24"><use href="#i-spark"/></svg>
+  <svg class="d s2 bob" viewBox="0 0 24 24"><use href="#i-heart"/></svg>
+  <svg class="d s3 bob slow" viewBox="0 0 24 24"><use href="#i-star"/></svg>
+  <svg class="d s4 wave" viewBox="0 0 60 16"><use class="o" href="#i-wave"/><use class="i" href="#i-wave"/></svg>
+</div>
+
+<main class="wrap">
+  <header class="head">
+    <div class="doodles" aria-hidden="true">
+      <svg class="d d-heart bob" viewBox="0 0 24 24"><use href="#i-heart"/></svg>
+      <svg class="d d-star bob slow" viewBox="0 0 24 24"><use href="#i-star"/></svg>
+      <svg class="d d-spark" viewBox="0 0 24 24"><use href="#i-spark"/></svg>
+      <svg class="d d-wave wave" viewBox="0 0 60 16"><use class="o" href="#i-wave"/><use class="i" href="#i-wave"/></svg>
+    </div>
+    <p class="eyebrow">Турнир Lunivra · Dead by Daylight</p>
+    <h1 aria-label="CUTIE">
+      <span aria-hidden="true" style="--i:0;--c:var(--pink);--r:-6deg">C</span><span aria-hidden="true" style="--i:1;--c:var(--orange);--r:4deg">U</span><span aria-hidden="true" style="--i:2;--c:var(--peri);--r:-3deg">T</span><span aria-hidden="true" style="--i:3;--c:var(--cream);--r:5deg">I</span><span aria-hidden="true" style="--i:4;--c:var(--pink);--r:-4deg">E</span>
+    </h1>
+    <p class="lede">Регистрация команд. Одна заявка — одна команда из&nbsp;четырёх игроков.</p>
+    <p class="places" id="places" hidden></p>
+  </header>
+
+  <noscript><p class="sheet">Чтобы зарегистрировать команду, включите JavaScript в&nbsp;браузере.</p></noscript>
+
+  <form class="sheet" id="form" novalidate autocomplete="off">
+    <div class="team">
+      <label for="team">Название команды</label>
+      <input id="team" name="team" maxlength="40" placeholder="Как вас объявлять" aria-describedby="team-err" enterkeyhint="next">
+      <p class="err" id="team-err"></p>
+    </div>
+
+    <div class="trap" aria-hidden="true">
+      <label for="website">Не заполняйте это поле</label>
+      <input id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <section class="squad" aria-labelledby="squad-title">
+      <div class="squad-head">
+        <h2 id="squad-title">Состав</h2>
+        <p>Ник и ссылка на&nbsp;профиль Steam — для каждого из&nbsp;четырёх</p>
+      </div>
+      <details class="hint">
+        <summary>Где взять ссылку на профиль</summary>
+        <p>В Steam нажмите на свой ник и откройте «Профиль», затем правой кнопкой по странице — «Скопировать адрес страницы». Если Steam открыт в браузере, скопируйте адрес из адресной строки. Подойдут ссылки вида <code>steamcommunity.com/id/ваш_ник</code> и <code>steamcommunity.com/profiles/7656119…</code></p>
+      </details>
+      <ol class="slots" id="slots"></ol>
+    </section>
+
+    <div class="fire" id="fire">
+      <p class="ready-line">
+        <span class="hearts" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg>
+        </span>
+        <span id="ready-text" aria-live="polite">Готовы 0 из 4</span>
+      </p>
+      <button class="go" id="go" type="submit">Зарегистрировать команду</button>
+      <p class="form-err" id="form-err" role="alert"></p>
+    </div>
+  </form>
+
+  <section class="sheet panel" id="done" hidden>
+    <h2 id="done-title" tabindex="-1"></h2>
+    <p><span class="badge" id="done-num"></span></p>
+    <p>Бабуля всё записала. Сделайте скриншот этой страницы — пригодится, если возникнут вопросы.</p>
+    <ol class="roster" id="roster"></ol>
+    <button class="again" id="again" type="button">Зарегистрировать ещё одну команду</button>
+  </section>
+
+  <section class="sheet panel" id="closed" hidden>
+    <h2 id="closed-title" tabindex="-1">Регистрация закрыта</h2>
+    <p id="closed-text">Заявки больше не принимаются.</p>
+  </section>
+</main>
+
+<div class="socks" aria-hidden="true"></div>
+
+<script>
+(() => {
+  const cfg = window.TOURNAMENT || {};
+  const $ = (s, r = document) => r.querySelector(s);
+  const N = 4;
+  const DRAFT = 'cutie-draft';
+
+  const form = $('#form'), teamEl = $('#team'), slotsEl = $('#slots');
+  const formErr = $('#form-err'), goBtn = $('#go');
+
+  // ── Четыре места в команде ──
+  for (let i = 1; i <= N; i++) {
+    const li = document.createElement('li');
+    li.className = 'slot';
+    li.innerHTML =
+      `<span class="seat" aria-hidden="true"><b>${i}</b></span>
+       <div class="fields">
+         <div class="field">
+           <label for="nick-${i}">Ник игрока ${i}</label>
+           <input id="nick-${i}" name="nick-${i}" maxlength="32" aria-describedby="nick-${i}-err" enterkeyhint="next">
+           <p class="err" id="nick-${i}-err"></p>
+         </div>
+         <div class="field">
+           <label for="steam-${i}">Ссылка на профиль Steam</label>
+           <input class="steam" id="steam-${i}" name="steam-${i}" maxlength="120" inputmode="url" autocapitalize="off" spellcheck="false"
+                  placeholder="steamcommunity.com/id/…" aria-describedby="steam-${i}-err" enterkeyhint="${i < N ? 'next' : 'done'}">
+           <p class="err" id="steam-${i}-err"></p>
+         </div>
+       </div>`;
+    slotsEl.append(li);
+  }
+  const nick = i => $('#nick-' + i), steam = i => $('#steam-' + i);
+  const slotOf = i => slotsEl.children[i - 1];
+  const fields = [teamEl];
+  for (let i = 1; i <= N; i++) fields.push(nick(i), steam(i));
+
+  // ── Ссылка Steam: принимаем с https и без, приводим к одному виду ──
+  function parseSteam(raw) {
+    let s = String(raw || '').trim();
+    if (!s) return { empty: true };
+    s = s.replace(/^(https?:)?\/\//i, '').replace(/^www\./i, '');
+    let m = s.match(/^steamcommunity\.com\/id\/([A-Za-z0-9_-]{2,32})(?:[\/?#].*)?$/i);
+    if (m) return { ok: true, url: 'https://steamcommunity.com/id/' + m[1], key: 'id/' + m[1].toLowerCase() };
+    m = s.match(/^steamcommunity\.com\/profiles\/(\d{17})(?:[\/?#].*)?$/i);
+    if (m) return { ok: true, url: 'https://steamcommunity.com/profiles/' + m[1], key: 'profiles/' + m[1] };
+    m = s.match(/^s\.team\/p\/([a-z]{1,8}-[a-z]{1,8})(?:[\/?#].*)?$/i);
+    if (m) return { ok: true, url: 'https://s.team/p/' + m[1].toLowerCase(), key: 'p/' + m[1].toLowerCase() };
+    return { ok: false };
+  }
+
+  // ── Проверки ──
+  function errorOf(el) {
+    if (el === teamEl) {
+      const v = teamEl.value.trim();
+      if (!v) return 'Введите название команды.';
+      if (v.length < 2) return 'Слишком коротко — нужно хотя бы 2 символа.';
+      return '';
+    }
+    const i = +el.id.split('-')[1];
+    if (el.id.startsWith('nick-')) return el.value.trim() ? '' : 'Введите ник игрока.';
+    const p = parseSteam(el.value);
+    if (p.empty) return 'Вставьте ссылку на профиль Steam.';
+    if (!p.ok) return 'Это не ссылка на профиль. Нужна такая: steamcommunity.com/id/… или steamcommunity.com/profiles/…';
+    for (let j = 1; j < i; j++) {
+      const q = parseSteam(steam(j).value);
+      if (q.ok && q.key === p.key) return `Эта же ссылка уже стоит у игрока ${j}.`;
+    }
+    return '';
+  }
+  const touched = new Set();
+  function paint(el, msg) {
+    $('#' + el.id + '-err').textContent = msg;
+    if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+  }
+  function check(el) { const msg = errorOf(el); paint(el, msg); return !msg; }
+
+  function updateReady() {
+    let count = 0;
+    for (let i = 1; i <= N; i++) {
+      const okNick = !errorOf(nick(i)), okSteam = !errorOf(steam(i));
+      const li = slotOf(i);
+      li.querySelector('.seat').style.setProperty('--p', (okNick ? 50 : 0) + (okSteam ? 50 : 0));
+      li.classList.toggle('ready', okNick && okSteam);
+      if (okNick && okSteam) count++;
+    }
+    document.querySelectorAll('.hearts svg').forEach((heart, k) => heart.classList.toggle('on', k < count));
+    $('#fire').classList.toggle('all-ready', count === N);
+    $('#ready-text').textContent = count === N ? 'Команда в сборе' : `Готовы ${count} из ${N}`;
+  }
+
+  // ── Черновик: чтобы случайная перезагрузка не стёрла введённое ──
+  let attempt = newAttempt();
+  function newAttempt() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
+  function saveDraft() {
+    try {
+      localStorage.setItem(DRAFT, JSON.stringify({ attempt, v: fields.map(f => f.value) }));
+    } catch (e) {}
+  }
+  function loadDraft() {
+    try {
+      const d = JSON.parse(localStorage.getItem(DRAFT) || 'null');
+      if (!d || !Array.isArray(d.v)) return;
+      fields.forEach((f, k) => { if (typeof d.v[k] === 'string') f.value = d.v[k]; });
+      if (d.attempt) attempt = d.attempt;
+    } catch (e) {}
+  }
+  function clearDraft() { try { localStorage.removeItem(DRAFT); } catch (e) {} }
+
+  fields.forEach(el => {
+    el.addEventListener('input', () => {
+      formErr.textContent = '';
+      if (touched.has(el)) check(el);
+      if (el.classList.contains('steam')) fields.forEach(o => { if (o !== el && o.classList.contains('steam') && touched.has(o)) check(o); });
+      updateReady();
+      saveDraft();
+    });
+    el.addEventListener('blur', () => {
+      if (!el.value.trim()) return;           // пустое поле не ругаем, пока не нажали «Зарегистрировать»
+      if (el.classList.contains('steam')) { const p = parseSteam(el.value); if (p.ok) el.value = p.url.replace(/^https:\/\//, ''); }
+      touched.add(el);
+      check(el);
+      saveDraft();
+    });
+  });
+
+  // ── Связь с таблицей ──
+  async function call(body) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
+    try {
+      const opts = { signal: ctrl.signal, redirect: 'follow' };
+      if (body) Object.assign(opts, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+      const res = await fetch(cfg.endpoint, opts);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } finally { clearTimeout(timer); }
+  }
+
+  function showClosed(reason) {
+    form.hidden = true; $('#done').hidden = true; $('#places').hidden = true;
+    $('#closed-text').textContent = reason === 'full'
+      ? 'Все места заняты — заявки больше не принимаются.'
+      : 'Заявки больше не принимаются.';
+    $('#closed').hidden = false;
+  }
+
+  function showDone(payload, number) {
+    $('#done-title').textContent = `«${payload.team}» в турнире`;
+    $('#done-num').textContent = number ? 'Заявка № ' + number : 'Заявка принята';
+    const roster = $('#roster');
+    roster.textContent = '';
+    payload.players.forEach(p => {
+      const li = document.createElement('li');
+      const a = document.createElement('span'); a.className = 'nick'; a.textContent = p.nick;
+      const b = document.createElement('span'); b.className = 'link'; b.textContent = p.steam.replace(/^https:\/\//, '');
+      li.append(a, b); roster.append(li);
+    });
+    form.hidden = true; $('#places').hidden = true;
+    $('#done').hidden = false;
+    $('#done-title').focus();
+    $('#done').scrollIntoView({ block: 'start', behavior: 'auto' });
+  }
+
+  let sending = false;
+  function setSending(on) {
+    sending = on;
+    goBtn.disabled = on;
+    goBtn.textContent = on ? 'Отправляем…' : 'Зарегистрировать команду';
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (sending) return;
+    formErr.textContent = '';
+    let firstBad = null;
+    fields.forEach(el => { touched.add(el); if (!check(el) && !firstBad) firstBad = el; });
+    updateReady();
+    if (firstBad) {
+      formErr.textContent = 'Заполните отмеченные поля — и команда готова.';
+      firstBad.focus();
+      return;
+    }
+    if (!cfg.endpoint) {
+      formErr.textContent = 'Форма ещё не подключена к таблице заявок — заявка не отправлена.';
+      return;
+    }
+    const payload = {
+      attempt,
+      team: teamEl.value.trim().replace(/\s+/g, ' '),
+      players: Array.from({ length: N }, (_, k) => ({ nick: nick(k + 1).value.trim(), steam: parseSteam(steam(k + 1).value).url })),
+      website: $('#website').value
+    };
+    setSending(true);
+    try {
+      const r = await call(payload);
+      if (r && r.ok) {
+        clearDraft();
+        showDone(payload, r.number);
+      } else if (r && r.error === 'team_taken') {
+        paint(teamEl, 'Команда с таким названием уже зарегистрирована — выберите другое.');
+        teamEl.focus();
+      } else if (r && r.error === 'player_taken' && Array.isArray(r.players) && r.players.length) {
+        r.players.forEach(i => { if (steam(i)) paint(steam(i), 'Этот профиль уже заявлен в другой команде.'); });
+        formErr.textContent = r.players.length > 1
+          ? 'Игроки ' + r.players.join(', ') + ' уже записаны в другой команде — заявка не отправлена.'
+          : 'Игрок ' + r.players[0] + ' уже записан в другой команде — заявка не отправлена.';
+        if (steam(r.players[0])) steam(r.players[0]).focus();
+      } else if (r && (r.error === 'closed' || r.error === 'full')) {
+        showClosed(r.error);
+      } else if (r && r.error === 'invalid') {
+        formErr.textContent = 'Таблица не приняла заявку: проверьте ники и ссылки и отправьте ещё раз.';
+      } else {
+        formErr.textContent = 'Не получилось записать заявку. Нажмите кнопку ещё раз — всё введённое на месте.';
+      }
+    } catch (err) {
+      formErr.textContent = 'Заявка не отправилась — похоже, пропал интернет. Нажмите кнопку ещё раз, всё введённое на месте.';
+    } finally {
+      setSending(false);
+    }
+  });
+
+  $('#again').addEventListener('click', () => {
+    fields.forEach(el => { el.value = ''; paint(el, ''); });
+    touched.clear();
+    attempt = newAttempt();
+    updateReady();
+    $('#done').hidden = true;
+    form.hidden = false;
+    teamEl.focus();
+    window.scrollTo(0, 0);
+  });
+
+  loadDraft();
+  updateReady();
+
+  // Открыта ли регистрация и сколько мест занято — спрашиваем у таблицы
+  if (cfg.endpoint) {
+    call().then(s => {
+      if (!s || !s.ok) return;
+      if (!s.open) return showClosed(s.reason);
+      if (s.max && $('#done').hidden) {
+        $('#places').textContent = `Занято мест: ${s.teams} из ${s.max}`;
+        $('#places').hidden = false;
+      }
+    }).catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
