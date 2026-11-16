@@ -139,6 +139,24 @@ h1 span {
 h1 span + span { margin-left: .025em; }
 @keyframes pop { from { transform: scale(.2) rotate(calc(var(--r) * -3)); opacity: 0; } }
 .lede { position: relative; margin: 0; max-width: 29rem; font-size: 1.1rem; font-weight: 500; line-height: 1.4; }
+.more { position: relative; margin: 1.1rem 0 0; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .5rem 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform .1s, box-shadow .1s;
+}
+.pill:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.pill:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.pill:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 .places {
   display: inline-block;
   margin: 1rem 0 0;
@@ -338,6 +356,7 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
       <span aria-hidden="true" style="--i:0;--c:var(--pink);--r:-6deg">C</span><span aria-hidden="true" style="--i:1;--c:var(--orange);--r:4deg">U</span><span aria-hidden="true" style="--i:2;--c:var(--peri);--r:-3deg">T</span><span aria-hidden="true" style="--i:3;--c:var(--cream);--r:5deg">I</span><span aria-hidden="true" style="--i:4;--c:var(--pink);--r:-4deg">E</span>
     </h1>
     <p class="lede">Регистрация команд. Одна заявка — одна команда из&nbsp;четырёх игроков.</p>
+    <p class="more"><a class="pill" href="rules.html">Правила турнира <span aria-hidden="true">→</span></a></p>
     <p class="places" id="places" hidden></p>
   </header>
 

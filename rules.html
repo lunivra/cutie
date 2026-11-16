@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CUTIE — правила турнира Lunivra</title>
+<meta name="description" content="Правила турнира CUTIE по Dead by Daylight от Lunivra: как проходят этапы, какие маньяки и перки разрешены.">
+<meta property="og:title" content="CUTIE — правила турнира">
+<meta property="og:description" content="Dead by Daylight. Три этапа, команды из четырёх выживших против одного маньяка.">
+<meta name="theme-color" content="#cdf23f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23cdf23f'/%3E%3Cpath d='M16 26C8 20 5 16.500 5 12c0-3.300 2.500-5.500 5.400-5.500 2.200 0 4.100 1.200 5.600 3.300 1.500-2.100 3.400-3.300 5.600-3.300C24.500 6.500 27 8.700 27 12c0 4.500-3 8-11 14z' fill='%23ff5fa2' stroke='%23161616' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Rubik:wght@400;500;700;800&display=swap">
+
+<!-- ───────────── КАРТИНКИ МАНЬЯКОВ И ПЕРКОВ ─────────────
+     sprite — лента из n одинаковых клеток (иконки подряд слева направо); perk: true — это перки, а не маньяки.
+     pages  — листы перков выживших, как скрины из игры.
+     Файлы лежат рядом со страницей. Если список убрать, на его месте будет «Список скоро появится». -->
+<script>
+window.RULES = {
+  's1-killers':      { sprite: 's1-killers.webp', n: 12 },
+  's1-killer-perks': { sprite: 's1-kperks.webp', n: 5, perk: true },
+  's1-surv-perks':   { pages: ['s1-surv-1.webp', 's1-surv-2.webp'] },
+  's2-killers':      { sprite: 's2-killers.webp', n: 13 },
+  's2-killer-perks': { sprite: 's2-kperks.webp', n: 4, perk: true },
+  's2-surv-perks':   { pages: ['s2-surv-1.webp', 's2-surv-2.webp', 's2-surv-3.webp'] },
+  's3-killers':      { sprite: 's3-killers.webp', n: 2 },
+  's3-killer-perks': { sprite: 's3-kperks.webp', n: 82, perk: true },
+  's3-surv-perks':   { pages: ['s3-surv-1.webp', 's3-surv-2.webp', 's3-surv-3.webp'] }
+};
+</script>
+
+<style>
+/* Тот же мир, что у страницы заявки: лаймовое поле, наклейки с чёрным контуром и жёсткой тенью.
+   Здесь главное — три этапа: у каждого свой цвет, перки стоят ромбами, как в самой игре. */
+:root {
+  color-scheme: light;
+  --lime: #cdf23f;
+  --lime-hot: #c6fc30;
+  --ink: #161616;
+  --cream: #fff7e8;
+  --white: #ffffff;
+  --pink: #ff5fa2;
+  --orange: #ff8a1f;
+  --peri: #8f9cf5;
+  --green: #3c7d3f;
+  --muted: #5d5a4d;
+  --rule: #d3cab4;
+  --display: 'Bagel Fat One', 'Rubik', system-ui, sans-serif;
+  --text: 'Rubik', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { height: 100%; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-x: clip;
+  font: 400 1.05rem/1.55 var(--text);
+  color: var(--ink);
+  background: radial-gradient(rgba(22, 22, 22, .1) 1.6px, transparent 2.1px) 0 0 / 24px 24px var(--lime);
+}
+.wrap {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-block: clamp(1.75rem, 6vw, 3.75rem) 3.5rem;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+}
+p { margin: 0; }
+a { color: inherit; }
+
+/* ── Каракули ── */
+.d { position: absolute; overflow: visible; fill: var(--c, var(--pink)); stroke: var(--ink); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; transform: rotate(var(--r, 0deg)); }
+.d.wave { fill: none; }
+.d.wave .o { stroke: var(--ink); stroke-width: 6.5; }
+.d.wave .i { stroke: var(--c, var(--peri)); stroke-width: 2.8; }
+.bob { animation: bob 5s ease-in-out infinite; }
+.bob.slow { animation-duration: 7s; animation-delay: -2s; }
+@keyframes bob { 50% { transform: translateY(-7px) rotate(calc(var(--r, 0deg) + 6deg)); } }
+.doodles { position: absolute; inset: 0; pointer-events: none; }
+.d-heart { --r: 14deg; right: 2%; top: 2.6rem; width: clamp(2.4rem, 9vw, 3.8rem); }
+.d-star { --c: var(--orange); --r: -12deg; right: 17%; top: 6.4rem; width: clamp(1.8rem, 7vw, 2.8rem); }
+.d-wave { --r: -8deg; right: 1%; bottom: 1.2rem; width: 5.5rem; }
+@media (max-width: 39.99rem) {
+  .d-wave { display: none; }
+  .d-star { right: 4%; top: 6.6rem; }
+}
+.side { position: fixed; inset: 0; pointer-events: none; z-index: 0; display: none; }
+@media (min-width: 72rem) {
+  .side { display: block; }
+  .s1 { --c: var(--cream); left: calc(50% - 35rem); top: 14%; width: 3rem; }
+  .s2 { --c: var(--peri); --r: -16deg; left: calc(50% - 38rem); top: 58%; width: 5.5rem; }
+  .s3 { --c: var(--pink); --r: 18deg; left: calc(50% + 28rem); top: 36%; width: 6rem; }
+  .s4 { --c: var(--orange); --r: 12deg; left: calc(50% + 27rem); top: 78%; width: 7rem; }
+}
+
+/* ── Шапка ── */
+.head { position: relative; padding-bottom: .25rem; }
+.eyebrow {
+  position: relative;
+  display: inline-block;
+  padding: .45rem .85rem;
+  font: 700 .72rem/1.25 var(--text);
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--ink);
+  border-radius: 999px;
+  transform: rotate(-2deg);
+}
+.logo {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin: .6rem 0 0;
+  font: 400 clamp(2.6rem, 12vw, 4.4rem)/1 var(--display);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.logo span {
+  display: inline-block;
+  color: var(--c);
+  -webkit-text-stroke: .055em var(--ink);
+  paint-order: stroke fill;
+  text-shadow: .05em .055em 0 var(--ink);
+  transform: rotate(var(--r));
+  animation: pop .55s cubic-bezier(.3, 1.6, .5, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+.logo span + span { margin-left: .025em; }
+.logo:focus-visible { outline: 3px solid var(--ink); outline-offset: 6px; border-radius: 10px; }
+@keyframes pop { from { transform: scale(.2) rotate(calc(var(--r) * -3)); opacity: 0; } }
+h1 {
+  position: relative;
+  width: fit-content;
+  margin: .35rem 0 0;
+  font: 800 clamp(3rem, 14vw, 5.5rem)/1.05 var(--text);
+  letter-spacing: -.01em;
+  color: var(--cream);
+  -webkit-text-stroke: .07em var(--ink);
+  paint-order: stroke fill;
+  text-shadow: .05em .06em 0 var(--ink);
+  transform: rotate(-2deg);
+  transform-origin: left center;
+}
+
+/* ── Листы ── */
+.sheet {
+  position: relative;
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: clamp(1.2rem, 4.5vw, 2.25rem);
+}
+.sheet > * + * { margin-top: 1rem; }
+h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wrap: balance; }
+h3 { margin: 0 0 .9rem; font: 700 1rem/1.3 var(--text); }
+.big { font: 700 clamp(1.25rem, 4.6vw, 1.55rem)/1.3 var(--text); text-wrap: balance; }
+.link { font-weight: 700; text-decoration: underline wavy var(--pink); text-decoration-thickness: 2px; text-underline-offset: .3em; }
+.link:focus-visible, .go:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
+
+.points { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .7rem; }
+.points li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: .7rem; align-items: start; }
+.points svg { width: 1.5rem; height: 1.5rem; margin-top: .12rem; overflow: visible; fill: var(--c, var(--pink)); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.ideal {
+  padding: .9rem 1.1rem;
+  background: var(--lime);
+  border: 2.5px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(-.6deg);
+}
+.ideal b { font-weight: 800; }
+
+/* ── Этапы ── */
+.stage-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: center; }
+.num {
+  width: 3.4rem;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font: 800 1.6rem/1 var(--text);
+  background: var(--c);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-8deg);
+}
+.stage-head p { margin-top: .2rem; color: var(--muted); font-weight: 500; }
+.group { margin-top: 1.4rem; padding-top: 1.3rem; border-top: 2px dashed var(--rule); }
+.note { margin-top: 1rem; font-weight: 500; }
+.soon { padding: .8rem 1rem; color: var(--muted); font-size: .95rem; border: 2px dashed var(--rule); border-radius: 12px; }
+
+/* маньяки — круглые наклейки, перки маньяка — тёмные плитки; тень цвета этапа */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(3.1rem, 9vw, 4.2rem), 1fr)); gap: .8rem .55rem; justify-items: center; }
+.tile {
+  width: 100%;
+  max-width: 4.6rem;
+  aspect-ratio: 1;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 3px 3px 0 var(--c);
+  background-color: var(--ink);
+  background-repeat: no-repeat;
+  background-size: calc(var(--n) * 100%) 100%;
+  background-position: calc(var(--i) / (var(--n) - 1) * 100%) 0;
+}
+.tiles.perks { grid-template-columns: repeat(auto-fill, minmax(clamp(2.9rem, 8.5vw, 3.6rem), 1fr)); }
+.tiles.perks .tile { max-width: 4rem; border-radius: 12px; }
+
+/* листы перков выживших — скрины из игры в рамке-наклейке; по нажатию открываются крупно */
+.shots { display: grid; gap: 1rem; }
+.shots.pages { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.shot {
+  display: block;
+  overflow: hidden;
+  background: #1c1c1a;
+  border: 2.5px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--c);
+  transition: transform .1s, box-shadow .1s;
+}
+.shot:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--c); }
+.shot:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+.shot img { display: block; width: 100%; height: auto; }
+
+/* ── Кнопка к заявке ── */
+.cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 1.5rem; }
+.cta p { font-weight: 700; font-size: 1.15rem; }
+.go {
+  display: inline-block;
+  padding: 1rem 1.6rem;
+  font: 800 1.05rem/1.2 var(--text);
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--pink);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: transform .1s, box-shadow .1s;
+}
+.go:hover { transform: translate(-1px, -1px); box-shadow: 7px 7px 0 var(--ink); }
+.go:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--ink); }
+@media (max-width: 36rem) {
+  .go { flex: 1 1 100%; text-align: center; }
+}
+
+.socks {
+  position: relative;
+  z-index: 1;
+  height: calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 3px solid var(--ink);
+  background: repeating-linear-gradient(90deg, var(--ink) 0 22px, var(--green) 22px 44px);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="i-heart" d="M12 20.500C5.500 15.600 3 12.600 3 9c0-2.700 2-4.600 4.500-4.600 1.800 0 3.300 1 4.500 2.700 1.200-1.700 2.700-2.700 4.500-2.700C19 4.400 21 6.300 21 9c0 3.600-2.500 6.600-9 11.500z"/>
+    <path id="i-star" d="M12 2.500l2.700 6.100 6.700.7-5 4.500 1.400 6.600L12 17l-5.800 3.400 1.400-6.600-5-4.500 6.700-.7z"/>
+    <path id="i-spark" d="M12 2c.9 5.600 3.400 8.100 10 10-6.600 1.900-9.100 4.400-10 10-.9-5.600-3.400-8.100-10-10 6.600-1.900 9.100-4.400 10-10z"/>
+    <path id="i-wave" d="M3 8q4.500-9 9 0t9 0 9 0 9 0 9 0 9 0"/>
+  </defs>
+</svg>
+
+<div class="side" aria-hidden="true">
+  <svg class="d s1 bob slow" viewBox="0 0 24 24"><use href="#i-spark"/></svg>
+  <svg class="d s2 bob" viewBox="0 0 24 24"><use href="#i-heart"/></svg>
+  <svg class="d s3 bob slow" viewBox="0 0 24 24"><use href="#i-star"/></svg>
+  <svg class="d s4 wave" viewBox="0 0 60 16"><use class="o" href="#i-wave"/><use class="i" href="#i-wave"/></svg>
+</div>
+
+<main class="wrap">
+  <header class="head">
+    <div class="doodles" aria-hidden="true">
+      <svg class="d d-heart bob" viewBox="0 0 24 24"><use href="#i-heart"/></svg>
+      <svg class="d d-star bob slow" viewBox="0 0 24 24"><use href="#i-star"/></svg>
+      <svg class="d d-wave wave" viewBox="0 0 60 16"><use class="o" href="#i-wave"/><use class="i" href="#i-wave"/></svg>
+    </div>
+    <p class="eyebrow">Турнир Lunivra · Dead by Daylight</p>
+    <a class="logo" href="./" aria-label="CUTIE — к заявке">
+      <span aria-hidden="true" style="--i:0;--c:var(--pink);--r:-6deg">C</span><span aria-hidden="true" style="--i:1;--c:var(--orange);--r:4deg">U</span><span aria-hidden="true" style="--i:2;--c:var(--peri);--r:-3deg">T</span><span aria-hidden="true" style="--i:3;--c:var(--cream);--r:5deg">I</span><span aria-hidden="true" style="--i:4;--c:var(--pink);--r:-4deg">E</span>
+    </a>
+    <h1>Правила</h1>
+  </header>
+
+  <section class="sheet">
+    <p class="big">Привет! Это мой первый турнир, и я очень хочу, чтобы вам понравилось.</p>
+    <p>Принять участие может абсолютно любой желающий, главное — чтобы у вас была команда из четырёх человек.</p>
+    <p>Для участия <a class="link" href="./">заполни заявку тут</a>.</p>
+  </section>
+
+  <section class="sheet" aria-labelledby="how">
+    <h2 id="how">Как проходит турнир</h2>
+    <ul class="points">
+      <li style="--c:var(--pink)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><span>Турнир проводится между командами из четырёх сурвов.</span></li>
+      <li style="--c:var(--orange)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span>Разные команды играют против одного киллера.</span></li>
+      <li style="--c:var(--peri)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-spark"/></svg><span>В следующий этап проходят лучшие. Те, кто отыграл хуже всех, выбывают.</span></li>
+    </ul>
+    <p class="ideal"><b>Идеальные условия:</b> завести все гены и дать как можно меньше повесов маньяку.</p>
+  </section>
+
+  <section class="sheet stage" style="--c:var(--pink)" aria-labelledby="st1">
+    <div class="stage-head">
+      <span class="num" aria-hidden="true">1</span>
+      <div>
+        <h2 id="st1">Этап 1</h2>
+        <p>Против вас играет маньяк 3-го тира.</p>
+      </div>
+    </div>
+    <div class="group"><h3>Маньяки 3-го тира</h3><div class="set" data-list="s1-killers"></div></div>
+    <div class="group"><h3>Разрешённые перки маньяка</h3><div class="set" data-list="s1-killer-perks"></div></div>
+    <div class="group">
+      <h3>Разрешённые перки выживших</h3>
+      <div class="set" data-list="s1-surv-perks"></div>
+      <p class="note">Повторять один и тот же перк разным людям нельзя.</p>
+    </div>
+  </section>
+
+  <section class="sheet stage" style="--c:var(--orange)" aria-labelledby="st2">
+    <div class="stage-head">
+      <span class="num" aria-hidden="true">2</span>
+      <div>
+        <h2 id="st2">Этап 2</h2>
+        <p>Маньяк играет на киллере 2-го тира.</p>
+      </div>
+    </div>
+    <div class="group"><h3>Маньяки 2-го тира</h3><div class="set" data-list="s2-killers"></div></div>
+    <div class="group"><h3>Разрешённые перки маньяка</h3><div class="set" data-list="s2-killer-perks"></div></div>
+    <div class="group"><h3>Разрешённые перки выживших</h3><div class="set" data-list="s2-surv-perks"></div></div>
+  </section>
+
+  <section class="sheet stage" style="--c:var(--peri)" aria-labelledby="st3">
+    <div class="stage-head">
+      <span class="num" aria-hidden="true">3</span>
+      <div>
+        <h2 id="st3">Этап 3</h2>
+        <p>Остаются три сильнейшие команды. Маньяк 1-го тира.</p>
+      </div>
+    </div>
+    <div class="group"><h3>Маньяки 1-го тира</h3><div class="set" data-list="s3-killers"></div></div>
+    <div class="group"><h3>Разрешённые перки маньяка</h3><div class="set" data-list="s3-killer-perks"></div></div>
+    <div class="group"><h3>Разрешённые перки выживших</h3><div class="set" data-list="s3-surv-perks"></div></div>
+  </section>
+
+  <section class="sheet cta">
+    <p>Команда собрана?</p>
+    <a class="go" href="./">Заполнить заявку</a>
+  </section>
+</main>
+
+<div class="socks" aria-hidden="true"></div>
+
+<script>
+(() => {
+  const lists = window.RULES || {};
+  document.querySelectorAll('.set[data-list]').forEach(box => {
+    const conf = lists[box.dataset.list];
+    const title = (box.previousElementSibling && box.previousElementSibling.textContent) || '';
+    if (!conf || !(conf.sprite || (conf.pages && conf.pages.length))) {
+      const p = document.createElement('p');
+      p.className = 'soon';
+      p.textContent = 'Список скоро появится.';
+      box.replaceWith(p);
+      return;
+    }
+    if (conf.sprite) {
+      box.classList.add('tiles');
+      if (conf.perk) box.classList.add('perks');
+      box.style.setProperty('--n', conf.n);
+      box.setAttribute('role', 'img');
+      box.setAttribute('aria-label', title + ': ' + conf.n);
+      for (let i = 0; i < conf.n; i++) {
+        const t = document.createElement('span');
+        t.className = 'tile';
+        t.style.setProperty('--i', i);
+        t.style.backgroundImage = 'url("' + conf.sprite + '")';
+        box.append(t);
+      }
+      return;
+    }
+    const files = conf.pages;
+    box.classList.add('shots', 'pages');
+    files.forEach((file, k) => {
+      const a = document.createElement('a');
+      a.className = 'shot'; a.href = file; a.target = '_blank'; a.rel = 'noopener';
+      const img = document.createElement('img');
+      img.src = file; img.loading = 'lazy';
+      img.alt = title + (files.length > 1 ? ', лист ' + (k + 1) + ' из ' + files.length : '');
+      a.append(img); box.append(a);
+    });
+  });
+})();
+</script>
+</body>
+</html>
