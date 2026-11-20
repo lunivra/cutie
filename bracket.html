@@ -18,14 +18,14 @@
        Порядок игр — по столбцу «Очередь» (номера раздаёт жеребьёвка, их можно поправить руками).
      Пока в листе «Настройки» стоит «Сетка видна всем: нет», страница показывает команды только по ссылке
      с ключом из этого листа: bracket.html#ключ. Адреса bracket.html#demo и #demo-start показывают пример без таблицы.
-     Маньяк каждого этапа — ниже: имя и портрет (лента-спрайт, n ячеек, i — номер нужной, с нуля). -->
+     Маньяк и карта каждого этапа — ниже: имя, карта и портрет (лента-спрайт, n ячеек, i — номер нужной, с нуля). -->
 <script>
 window.TOURNAMENT = {
   endpoint: 'https://script.google.com/macros/s/AKfycbywXV_dYE6tCLooiDdoJhY77q0vM9-A3D4TeR5MqffmtvTMwFYNbidi2nVbkpiSEWVz2A/exec',
   killers: [
-    { name: 'Демогоргон',  sprite: 's1-killers.webp', n: 12, i: 3 },
-    { name: 'Деревенщина', sprite: 's2-killers.webp', n: 13, i: 0 },
-    { name: 'Мор',         sprite: 's3-killers.webp', n: 2,  i: 1 }
+    { name: 'Демогоргон',  map: 'Угольная башня',  sprite: 's1-killers.webp', n: 12, i: 3 },
+    { name: 'Деревенщина', map: 'Кровавая лачуга', sprite: 's2-killers.webp', n: 13, i: 0 },
+    { name: 'Мор',         map: 'Удушающая яма',   sprite: 's3-killers.webp', n: 2,  i: 1 }
   ]
 };
 </script>
@@ -184,8 +184,11 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
 .stages { display: grid; gap: 1.25rem; align-items: start; }
 @media (min-width: 56rem) {
   .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stage.all { grid-column: 1 / -1; }
+  .stage.all, .pass { grid-column: 1 / -1; }
 }
+/* правило прохода — тёмная полоса между первым этапом и следующими */
+.pass { padding: .75rem 1.1rem; font-size: .98rem; font-weight: 500; line-height: 1.4; color: var(--cream); background: var(--ink); border-radius: 16px; }
+.pass b { font-weight: 800; color: var(--lime-hot); }
 /* шапка этапа: номер, название, маньяк; если маньяку тесно в строке — он уходит под название */
 .stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem .85rem; }
 .stage-head > div { flex: 1 1 12rem; min-width: 0; }
@@ -213,9 +216,9 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
   border: 2px solid var(--ink);
   border-radius: 999px;
 }
-/* маньяк этапа — пилюля с портретом */
+/* маньяк и карта этапа — две пилюли рядом: с портретом и со значком-меткой */
+.meta { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: .6rem .65rem; }
 .killer {
-  flex: none;
   width: fit-content;
   display: flex;
   align-items: center;
@@ -236,6 +239,8 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
   background-position: calc(var(--i) / (var(--n) - 1) * 100%) 0;
   transform: scale(1.14);   /* у портретов в ленте тёмный ободок — прячем его за край */
 }
+.face.pin { display: grid; place-items: center; background: var(--c); }
+.face.pin svg { width: 1.6rem; height: 1.6rem; overflow: visible; fill: var(--cream); fill-rule: evenodd; stroke: var(--ink); stroke-width: 1.8; stroke-linejoin: round; }
 .killer small { display: block; font: 700 .64rem/1.2 var(--text); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .killer b { display: block; font: 800 1.08rem/1.2 var(--text); }
 
@@ -295,6 +300,7 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
   <defs>
     <path id="i-heart" d="M12 20.500C5.500 15.600 3 12.600 3 9c0-2.700 2-4.600 4.500-4.600 1.800 0 3.300 1 4.500 2.700 1.200-1.700 2.700-2.700 4.500-2.700C19 4.400 21 6.300 21 9c0 3.600-2.500 6.600-9 11.500z"/>
     <path id="i-star" d="M12 2.500l2.700 6.100 6.700.7-5 4.500 1.400 6.600L12 17l-5.800 3.400 1.400-6.600-5-4.500 6.700-.7z"/>
+    <path id="i-pin" d="M12 22c-4.700-4.600-7-8.300-7-11.400a7 7 0 0 1 14 0c0 3.100-2.300 6.800-7 11.400zM12 8a2.600 2.600 0 1 0 0 5.200A2.600 2.600 0 0 0 12 8z"/>
   </defs>
 </svg>
 
@@ -328,17 +334,19 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
       <div class="stage-head">
         <span class="num" aria-hidden="true">1</span>
         <div><h2 id="st1">Этап 1</h2><p class="sub"><span class="count" data-count="1"></span><span>Играют все команды</span></p></div>
-        <p class="killer" data-killer="1"></p>
+        <p class="meta" data-killer="1"></p>
       </div>
       <ol class="teams" data-stage="1"></ol>
       <p class="soon" data-empty="1" hidden>Пока никто не записался.</p>
     </section>
 
+    <p class="pass"><b>Кто проходит дальше:</b> команды с&nbsp;наименьшим количеством хуков. Если хуков поровну&nbsp;— смотрим по&nbsp;фреш-хуку. Места в&nbsp;третьем этапе распределяются так&nbsp;же.</p>
+
     <section class="sheet stage" style="--c:var(--orange)" aria-labelledby="st2">
       <div class="stage-head">
         <span class="num" aria-hidden="true">2</span>
         <div><h2 id="st2">Этап 2</h2><p class="sub"><span class="count" data-count="2"></span><span>Лучшие из первого этапа</span></p></div>
-        <p class="killer" data-killer="2"></p>
+        <p class="meta" data-killer="2"></p>
       </div>
       <ol class="teams" data-stage="2"></ol>
       <p class="soon" data-empty="2" hidden>Кто пройдёт — станет известно после первого этапа.</p>
@@ -348,7 +356,7 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
       <div class="stage-head">
         <span class="num" aria-hidden="true">3</span>
         <div><h2 id="st3">Этап 3</h2><p class="sub"><span class="count" data-count="3"></span><span>Три сильнейшие команды</span></p></div>
-        <p class="killer" data-killer="3"></p>
+        <p class="meta" data-killer="3"></p>
       </div>
       <ol class="teams" data-stage="3"></ol>
       <p class="soon" data-empty="3" hidden>Финалисты определятся после второго этапа.</p>
@@ -386,28 +394,41 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
     return n + ' ' + (a === 1 && b !== 11 ? 'команда' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'команды' : 'команд');
   }
 
-  // маньяк этапа: портрет из ленты и имя
-  (cfg.killers || []).forEach((k, idx) => {
-    const box = document.querySelector('[data-killer="' + (idx + 1) + '"]');
-    if (!box || !k || !k.name) return;
-    if (k.sprite) {
-      const face = document.createElement('span');
-      face.className = 'face';
-      face.setAttribute('aria-hidden', 'true');
-      const img = document.createElement('i');
-      img.style.backgroundImage = 'url("' + k.sprite + '")';
-      img.style.setProperty('--n', k.n);
-      img.style.setProperty('--i', k.i);
-      face.append(img);
-      box.append(face);
-    }
+  // маньяк и карта этапа: пилюля с портретом из ленты и пилюля со значком-меткой
+  function tag(label, value, face) {
+    const pill = document.createElement('span');
+    pill.className = 'killer';
+    face.setAttribute('aria-hidden', 'true');
     const text = document.createElement('span');
     const small = document.createElement('small');
-    small.textContent = 'Маньяк';
+    small.textContent = label;
     const b = document.createElement('b');
-    b.textContent = k.name;
+    b.textContent = value;
     text.append(small, b);
-    box.append(text);
+    pill.append(face, text);
+    return pill;
+  }
+  (cfg.killers || []).forEach((k, idx) => {
+    const box = document.querySelector('[data-killer="' + (idx + 1) + '"]');
+    if (!box || !k) return;
+    if (k.name) {
+      const face = document.createElement('span');
+      face.className = 'face';
+      if (k.sprite) {
+        const img = document.createElement('i');
+        img.style.backgroundImage = 'url("' + k.sprite + '")';
+        img.style.setProperty('--n', k.n);
+        img.style.setProperty('--i', k.i);
+        face.append(img);
+      }
+      box.append(tag('Маньяк', k.name, face));
+    }
+    if (k.map) {
+      const face = document.createElement('span');
+      face.className = 'face pin';
+      face.innerHTML = '<svg viewBox="0 0 24 24"><use href="#i-pin"/></svg>';
+      box.append(tag('Карта', k.map, face));
+    }
   });
 
   function fill(n, names, next, rosters) {
