@@ -186,7 +186,10 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
   .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stage.all { grid-column: 1 / -1; }
 }
-.stage-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .7rem .85rem; align-items: center; }
+/* шапка этапа: номер, название, маньяк; если маньяку тесно в строке — он уходит под название */
+.stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem .85rem; }
+.stage-head > div { flex: 1 1 12rem; min-width: 0; }
+.stage-head h2 { white-space: nowrap; }
 .num {
   width: 2.9rem;
   aspect-ratio: 1;
@@ -212,7 +215,7 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
 }
 /* маньяк этапа — пилюля с портретом */
 .killer {
-  grid-column: 1 / -1;
+  flex: none;
   width: fit-content;
   display: flex;
   align-items: center;
@@ -222,10 +225,6 @@ h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-
   border: 2.5px solid var(--ink);
   border-radius: 999px;
   box-shadow: 3px 3px 0 var(--c);
-}
-@media (min-width: 34rem) {
-  .stage-head { grid-template-columns: auto minmax(0, 1fr) auto; }
-  .killer { grid-column: auto; }
 }
 .face { flex: none; width: 3.2rem; aspect-ratio: 1; overflow: hidden; background: var(--ink); border: 2.5px solid var(--ink); border-radius: 50%; }
 .face i {
