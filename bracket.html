@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>CUTIE — сетка турнира Lunivra</title>
-<meta name="description" content="Сетка турнира CUTIE по Dead by Daylight: какие команды играют в каждом этапе.">
+<meta name="description" content="Сетка турнира CUTIE по Dead by Daylight: в каком порядке играют команды в каждом этапе.">
 <meta name="theme-color" content="#cdf23f">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23cdf23f'/%3E%3Cpath d='M16 26C8 20 5 16.500 5 12c0-3.300 2.500-5.500 5.400-5.500 2.200 0 4.100 1.200 5.600 3.300 1.500-2.100 3.400-3.300 5.600-3.300C24.500 6.500 27 8.700 27 12c0 4.500-3 8-11 14z' fill='%23ff5fa2' stroke='%23161616' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,17 +15,24 @@
 <!-- ───────────── НАСТРОЙКА ─────────────
      Команды берутся из той же Google-таблицы, что и заявки (лист «Команды»):
        этап 1 — все записавшиеся; этапы 2 и 3 — те, у кого стоит галочка в столбцах «Этап 2» и «Этап 3».
+       Порядок игр — по столбцу «Очередь» (номера раздаёт жеребьёвка, их можно поправить руками).
      Пока в листе «Настройки» стоит «Сетка видна всем: нет», страница показывает команды только по ссылке
-     с ключом из этого листа: bracket.html#ключ. Адрес bracket.html#demo показывает пример без таблицы. -->
+     с ключом из этого листа: bracket.html#ключ. Адреса bracket.html#demo и #demo-start показывают пример без таблицы.
+     Маньяк каждого этапа — ниже: имя и портрет (лента-спрайт, n ячеек, i — номер нужной, с нуля). -->
 <script>
 window.TOURNAMENT = {
-  endpoint: 'https://script.google.com/macros/s/AKfycbywXV_dYE6tCLooiDdoJhY77q0vM9-A3D4TeR5MqffmtvTMwFYNbidi2nVbkpiSEWVz2A/exec'
+  endpoint: 'https://script.google.com/macros/s/AKfycbywXV_dYE6tCLooiDdoJhY77q0vM9-A3D4TeR5MqffmtvTMwFYNbidi2nVbkpiSEWVz2A/exec',
+  killers: [
+    { name: 'Демогоргон',  sprite: 's1-killers.webp', n: 12, i: 3 },
+    { name: 'Деревенщина', sprite: 's2-killers.webp', n: 13, i: 7 },
+    { name: 'Мор',         sprite: 's3-killers.webp', n: 2,  i: 1 }
+  ]
 };
 </script>
 
 <style>
-/* Тот же мир, что у заявки и правил. Сетка — три колонки-этапа слева направо (на телефоне — сверху вниз):
-   команда-наклейка едет из этапа в этап; кто не прошёл дальше, тускнеет. */
+/* Тот же мир, что у заявки и правил. Сетка — это очередь игр: сверху первый этап со всеми командами
+   по номерам, под ним второй и третий. У каждого этапа свой маньяк; кто не прошёл дальше, тускнеет. */
 :root {
   color-scheme: light;
   --lime: #cdf23f;
@@ -65,35 +72,28 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding-block: clamp(1.75rem, 6vw, 3.75rem) 3.5rem;
-  padding-left: max(18px, env(safe-area-inset-left, 0px));
-  padding-right: max(18px, env(safe-area-inset-right, 0px));
+  gap: 1.25rem;
+  padding-block: clamp(1.5rem, 5vw, 2.75rem) 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 p { margin: 0; }
 
-/* ── Каракули и шапка ── */
+/* ── Каракули и шапка: название и слово «Сетка» в одну строку, чтобы команды начинались сразу ── */
 .d { position: absolute; overflow: visible; fill: var(--c, var(--pink)); stroke: var(--ink); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; transform: rotate(var(--r, 0deg)); }
-.d.wave { fill: none; }
-.d.wave .o { stroke: var(--ink); stroke-width: 6.5; }
-.d.wave .i { stroke: var(--c, var(--peri)); stroke-width: 2.8; }
 .bob { animation: bob 5s ease-in-out infinite; }
 .bob.slow { animation-duration: 7s; animation-delay: -2s; }
 @keyframes bob { 50% { transform: translateY(-7px) rotate(calc(var(--r, 0deg) + 6deg)); } }
-.head { position: relative; max-width: 44rem; padding-bottom: .25rem; }
+.head { position: relative; }
 .doodles { position: absolute; inset: 0; pointer-events: none; }
-.d-heart { --r: 14deg; right: 2%; top: 2.6rem; width: clamp(2.4rem, 9vw, 3.8rem); }
-.d-star { --c: var(--orange); --r: -12deg; right: 17%; top: 6.4rem; width: clamp(1.8rem, 7vw, 2.8rem); }
-.d-wave { --r: -8deg; right: 1%; bottom: 1.2rem; width: 5.5rem; }
-@media (max-width: 39.99rem) {
-  .d-wave { display: none; }
-  .d-star { right: 4%; top: 6.6rem; }
-}
+.d-heart { --r: 14deg; right: 1.5%; top: .2rem; width: clamp(2rem, 7vw, 3rem); }
+.d-star { --c: var(--orange); --r: -12deg; right: 11%; top: 3.2rem; width: clamp(1.5rem, 5vw, 2.2rem); }
+@media (max-width: 39.99rem) { .d-star { display: none; } }
 .eyebrow {
   position: relative;
   display: inline-block;
-  padding: .45rem .85rem;
-  font: 700 .72rem/1.25 var(--text);
+  padding: .4rem .8rem;
+  font: 700 .7rem/1.25 var(--text);
   letter-spacing: .11em;
   text-transform: uppercase;
   color: var(--cream);
@@ -101,12 +101,11 @@ p { margin: 0; }
   border-radius: 999px;
   transform: rotate(-2deg);
 }
+.title { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .1rem 1.1rem; margin-top: .45rem; }
 .logo {
-  position: relative;
   display: block;
   width: fit-content;
-  margin: .6rem 0 0;
-  font: 400 clamp(2.6rem, 12vw, 4.4rem)/1 var(--display);
+  font: 400 clamp(2.5rem, 11vw, 3.7rem)/1 var(--display);
   white-space: nowrap;
   text-decoration: none;
 }
@@ -124,35 +123,35 @@ p { margin: 0; }
 .logo:focus-visible { outline: 3px solid var(--ink); outline-offset: 6px; border-radius: 10px; }
 @keyframes pop { from { transform: scale(.2) rotate(calc(var(--r) * -3)); opacity: 0; } }
 h1 {
-  position: relative;
   width: fit-content;
-  margin: .35rem 0 0;
-  font: 800 clamp(3rem, 14vw, 5.5rem)/1.05 var(--text);
+  margin: 0;
+  font: 800 clamp(2.3rem, 10vw, 3.5rem)/1.1 var(--text);
   letter-spacing: -.01em;
   color: var(--cream);
   -webkit-text-stroke: .07em var(--ink);
   paint-order: stroke fill;
   text-shadow: .05em .06em 0 var(--ink);
   transform: rotate(-2deg);
-  transform-origin: left center;
 }
+.lead { position: relative; max-width: 40rem; margin-top: .7rem; font-weight: 500; line-height: 1.4; }
 
 /* ── Листы, плашки, ссылки ── */
 .sheet {
   position: relative;
   background: var(--cream);
   border: 3px solid var(--ink);
-  border-radius: 24px;
-  box-shadow: 8px 8px 0 var(--ink);
-  padding: clamp(1.1rem, 4vw, 1.75rem);
+  border-radius: 22px;
+  box-shadow: 7px 7px 0 var(--ink);
+  padding: clamp(1rem, 3.5vw, 1.4rem);
 }
-.sheet > * + * { margin-top: 1rem; }
 .narrow { max-width: 44rem; }
-h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wrap: balance; }
+.narrow > * + * { margin-top: .8rem; }
+h2 { margin: 0; font: 800 clamp(1.45rem, 5.5vw, 1.75rem)/1.15 var(--text); text-wrap: balance; }
 .banner {
   width: fit-content;
   max-width: 44rem;
-  padding: .7rem 1.1rem;
+  padding: .6rem 1rem;
+  font-size: .95rem;
   font-weight: 500;
   background: var(--white);
   border: 2.5px solid var(--ink);
@@ -181,58 +180,103 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
 .pill:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 .pill:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 
-/* ── Три этапа ── */
-.stages { display: grid; gap: 1.5rem; align-items: start; }
-@media (min-width: 62rem) {
-  .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* ── Этапы: первый во всю ширину, второй и третий — парой под ним ── */
+.stages { display: grid; gap: 1.25rem; align-items: start; }
+@media (min-width: 56rem) {
+  .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage.all { grid-column: 1 / -1; }
 }
-.stage-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .9rem; align-items: center; }
+.stage-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .7rem .85rem; align-items: center; }
 .num {
-  width: 3.2rem;
+  width: 2.9rem;
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  font: 800 1.5rem/1 var(--text);
+  font: 800 1.4rem/1 var(--text);
   background: var(--c);
   border: 3px solid var(--ink);
   border-radius: 50%;
   box-shadow: 3px 3px 0 var(--ink);
   transform: rotate(-8deg);
 }
-.stage-head p { margin-top: .15rem; color: var(--muted); font-weight: 500; font-size: .95rem; }
+.sub { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .55rem; margin-top: .25rem; color: var(--muted); font-weight: 500; font-size: .92rem; line-height: 1.3; }
 .count {
-  width: fit-content;
-  padding: .2rem .7rem;
-  font-size: .85rem;
+  padding: .1rem .6rem;
+  font-size: .82rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--ink);
   background: var(--c);
   border: 2px solid var(--ink);
   border-radius: 999px;
 }
-.teams { list-style: none; margin: 1.1rem 0 0; padding: 1.1rem 0 0; border-top: 2px dashed var(--rule); display: grid; gap: .65rem; }
-.team {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: .5rem;
+/* маньяк этапа — пилюля с портретом */
+.killer {
+  grid-column: 1 / -1;
+  width: fit-content;
+  display: flex;
   align-items: center;
-  padding: .6rem .85rem;
-  font-weight: 700;
-  line-height: 1.25;
-  overflow-wrap: anywhere;
+  gap: .65rem;
+  padding: .3rem 1rem .3rem .3rem;
   background: var(--white);
   border: 2.5px solid var(--ink);
-  border-radius: 12px;
+  border-radius: 999px;
   box-shadow: 3px 3px 0 var(--c);
 }
-.team svg { width: 1.2rem; height: 1.2rem; overflow: visible; fill: var(--c); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
-.team.out { color: var(--muted); font-weight: 500; background: transparent; border-color: var(--rule); box-shadow: none; }
+@media (min-width: 34rem) {
+  .stage-head { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .killer { grid-column: auto; }
+}
+.face { flex: none; width: 3.2rem; aspect-ratio: 1; overflow: hidden; background: var(--ink); border: 2.5px solid var(--ink); border-radius: 50%; }
+.face i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: calc(var(--n) * 100%) 100%;
+  background-position: calc(var(--i) / (var(--n) - 1) * 100%) 0;
+  transform: scale(1.14);   /* у портретов в ленте тёмный ободок — прячем его за край */
+}
+.killer small { display: block; font: 700 .64rem/1.2 var(--text); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.killer b { display: block; font: 800 1.08rem/1.2 var(--text); }
+
+/* очередь команд: номер — место в порядке игр; на широком экране список идёт колонками сверху вниз */
+.teams { list-style: none; margin: 1rem 0 0; padding: 1rem 0 0; border-top: 2px dashed var(--rule); columns: 2 13rem; column-gap: .7rem; }
+.stage.all .teams { columns: 3 15rem; }
+.team {
+  break-inside: avoid;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: .1rem .6rem;
+  align-items: center;
+  margin-bottom: .45rem;
+  padding: .32rem .6rem .32rem .34rem;
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 11px;
+}
+.pos {
+  width: 2rem;          /* одна ширина для «7» и «19» — названия стоят ровным столбцом */
+  height: 1.85rem;
+  display: grid;
+  place-items: center;
+  font: 800 .92rem/1 var(--text);
+  font-variant-numeric: tabular-nums;
+  background: var(--c);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+.name { font-weight: 700; font-size: .97rem; line-height: 1.25; overflow-wrap: anywhere; }
+.team svg { width: 1.1rem; height: 1.1rem; overflow: visible; fill: var(--c); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.team.out { background: transparent; border-color: var(--rule); }
+.team.out .name { color: var(--muted); font-weight: 500; }
+.team.out .pos { color: var(--muted); background: transparent; border-color: var(--rule); }
 /* состав команды — виден только по ссылке с ключом */
-.roster { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .1rem .85rem; margin: .1rem 0 0; padding: 0; list-style: none; font-size: .84rem; font-weight: 500; color: var(--muted); }
+.roster { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 0 .7rem; margin: 0; padding: 0 0 .1rem; list-style: none; font-size: .8rem; font-weight: 500; line-height: 1.35; color: var(--muted); }
 .roster a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: .2em; }
 .roster a:hover { color: var(--ink); text-decoration-color: var(--ink); }
 .roster a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 3px; }
-.soon { margin-top: 1.1rem; padding: .9rem 1rem; color: var(--muted); font-size: .95rem; border: 2px dashed var(--rule); border-radius: 12px; }
+.soon { margin-top: 1rem; padding: .75rem .9rem; color: var(--muted); font-size: .93rem; line-height: 1.4; border: 2px dashed var(--rule); border-radius: 12px; }
 
 .socks {
   position: relative;
@@ -252,7 +296,6 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
   <defs>
     <path id="i-heart" d="M12 20.500C5.500 15.600 3 12.600 3 9c0-2.700 2-4.600 4.500-4.600 1.800 0 3.300 1 4.500 2.700 1.200-1.700 2.700-2.700 4.500-2.700C19 4.400 21 6.300 21 9c0 3.600-2.500 6.600-9 11.500z"/>
     <path id="i-star" d="M12 2.500l2.700 6.100 6.700.7-5 4.500 1.400 6.600L12 17l-5.800 3.400 1.400-6.600-5-4.500 6.700-.7z"/>
-    <path id="i-wave" d="M3 8q4.500-9 9 0t9 0 9 0 9 0 9 0 9 0"/>
   </defs>
 </svg>
 
@@ -261,13 +304,15 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
     <div class="doodles" aria-hidden="true">
       <svg class="d d-heart bob" viewBox="0 0 24 24"><use href="#i-heart"/></svg>
       <svg class="d d-star bob slow" viewBox="0 0 24 24"><use href="#i-star"/></svg>
-      <svg class="d d-wave wave" viewBox="0 0 60 16"><use class="o" href="#i-wave"/><use class="i" href="#i-wave"/></svg>
     </div>
     <p class="eyebrow">Турнир Lunivra · Dead by Daylight</p>
-    <a class="logo" href="./" aria-label="CUTIE — к заявке">
-      <span aria-hidden="true" style="--i:0;--c:var(--pink);--r:-6deg">C</span><span aria-hidden="true" style="--i:1;--c:var(--orange);--r:4deg">U</span><span aria-hidden="true" style="--i:2;--c:var(--peri);--r:-3deg">T</span><span aria-hidden="true" style="--i:3;--c:var(--cream);--r:5deg">I</span><span aria-hidden="true" style="--i:4;--c:var(--pink);--r:-4deg">E</span>
-    </a>
-    <h1>Сетка</h1>
+    <div class="title">
+      <a class="logo" href="./" aria-label="CUTIE — к заявке">
+        <span aria-hidden="true" style="--i:0;--c:var(--pink);--r:-6deg">C</span><span aria-hidden="true" style="--i:1;--c:var(--orange);--r:4deg">U</span><span aria-hidden="true" style="--i:2;--c:var(--peri);--r:-3deg">T</span><span aria-hidden="true" style="--i:3;--c:var(--cream);--r:5deg">I</span><span aria-hidden="true" style="--i:4;--c:var(--pink);--r:-4deg">E</span>
+      </a>
+      <h1>Сетка</h1>
+    </div>
+    <p class="lead" id="lead" hidden>Игры идут подряд, одна за другой. Номер рядом с&nbsp;командой&nbsp;— её место в&nbsp;очереди: порядок выбрала жеребьёвка.</p>
   </header>
 
   <p class="banner" id="banner" hidden></p>
@@ -276,44 +321,44 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
 
   <section class="sheet narrow" id="closed" hidden>
     <h2>Сетка появится накануне турнира</h2>
-    <p>Пока идёт регистрация. Когда состав определится, здесь будут все команды по этапам.</p>
+    <p>Когда состав определится, здесь будут все команды по этапам и порядок игр.</p>
   </section>
 
   <div class="stages" id="stages" hidden>
-    <section class="sheet" style="--c:var(--pink)" aria-labelledby="st1">
+    <section class="sheet stage all" style="--c:var(--pink)" aria-labelledby="st1">
       <div class="stage-head">
         <span class="num" aria-hidden="true">1</span>
-        <div><h2 id="st1">Этап 1</h2><p>Все команды · маньяк 3-го тира</p></div>
+        <div><h2 id="st1">Этап 1</h2><p class="sub"><span class="count" data-count="1"></span><span>Играют все команды</span></p></div>
+        <p class="killer" data-killer="1"></p>
       </div>
-      <p class="count" data-count="1"></p>
       <ol class="teams" data-stage="1"></ol>
       <p class="soon" data-empty="1" hidden>Пока никто не записался.</p>
     </section>
 
-    <section class="sheet" style="--c:var(--orange)" aria-labelledby="st2">
+    <section class="sheet stage" style="--c:var(--orange)" aria-labelledby="st2">
       <div class="stage-head">
         <span class="num" aria-hidden="true">2</span>
-        <div><h2 id="st2">Этап 2</h2><p>Лучшие из первого · маньяк 2-го тира</p></div>
+        <div><h2 id="st2">Этап 2</h2><p class="sub"><span class="count" data-count="2"></span><span>Лучшие из первого этапа</span></p></div>
+        <p class="killer" data-killer="2"></p>
       </div>
-      <p class="count" data-count="2"></p>
       <ol class="teams" data-stage="2"></ol>
       <p class="soon" data-empty="2" hidden>Кто пройдёт — станет известно после первого этапа.</p>
     </section>
 
-    <section class="sheet" style="--c:var(--peri)" aria-labelledby="st3">
+    <section class="sheet stage" style="--c:var(--peri)" aria-labelledby="st3">
       <div class="stage-head">
         <span class="num" aria-hidden="true">3</span>
-        <div><h2 id="st3">Этап 3</h2><p>Три сильнейшие · маньяк 1-го тира</p></div>
+        <div><h2 id="st3">Этап 3</h2><p class="sub"><span class="count" data-count="3"></span><span>Три сильнейшие команды</span></p></div>
+        <p class="killer" data-killer="3"></p>
       </div>
-      <p class="count" data-count="3"></p>
       <ol class="teams" data-stage="3"></ol>
       <p class="soon" data-empty="3" hidden>Финалисты определятся после второго этапа.</p>
     </section>
   </div>
 
   <nav class="links" aria-label="Другие страницы">
-    <a class="pill" href="./">Заявка <span aria-hidden="true">→</span></a>
     <a class="pill" href="rules.html">Правила <span aria-hidden="true">→</span></a>
+    <a class="pill" href="./">Заявка <span aria-hidden="true">→</span></a>
   </nav>
 </main>
 
@@ -323,23 +368,48 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
 (() => {
   const cfg = window.TOURNAMENT || {};
   const $ = s => document.querySelector(s);
-  const state = $('#state'), banner = $('#banner'), closed = $('#closed'), stages = $('#stages');
+  const state = $('#state'), banner = $('#banner'), closed = $('#closed'), stages = $('#stages'), lead = $('#lead');
   const mode = decodeURIComponent(location.hash.slice(1));     // ключ из ссылки или «demo»
 
   const DEMO = {
     ok: true, hidden: false, open: false, demo: true,
     stage1: ['Последний генератор', 'Четыре фонарика', 'Крюк подождёт', 'Люк на двоих', 'Не трогай тотем', 'Туман и паллеты',
-             'Скилл-чек', 'Бегущие по кукурузе', 'Мёртвый штиль', 'Синяя аптечка', 'Тихий шкафчик', 'Ворота открыты'],
-    stage2: ['Последний генератор', 'Крюк подождёт', 'Не трогай тотем', 'Скилл-чек', 'Мёртвый штиль', 'Ворота открыты'],
+             'Скилл-чек', 'Бегущие по кукурузе', 'Мёртвый штиль', 'Синяя аптечка', 'Тихий шкафчик', 'Ворота открыты',
+             'Пятый ген', 'Свет в подвале', 'Сальто через окно', 'Кобыла в тумане', 'Ласточка ушла', 'Палетка судьбы', 'Очень длинное название команды из сорока букв'],
+    stage2: ['Последний генератор', 'Крюк подождёт', 'Не трогай тотем', 'Скилл-чек', 'Мёртвый штиль', 'Ворота открыты', 'Пятый ген', 'Кобыла в тумане'],
     stage3: ['Крюк подождёт', 'Скилл-чек', 'Ворота открыты']
   };
+  DEMO.rosters = Object.fromEntries(DEMO.stage1.map(name => [name, [1, 2, 3, 4].map(k => ({ nick: 'Игрок ' + k, steam: '' }))]));
+  const DEMO_START = Object.assign({}, DEMO, { stage2: [], stage3: [], rosters: null, open: true, demo: false });
 
   function plural(n) {
     const a = n % 10, b = n % 100;
     return n + ' ' + (a === 1 && b !== 11 ? 'команда' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'команды' : 'команд');
   }
 
-  DEMO.rosters = Object.fromEntries(DEMO.stage1.map(name => [name, [1, 2, 3, 4].map(k => ({ nick: 'Игрок ' + k, steam: '' }))]));
+  // маньяк этапа: портрет из ленты и имя
+  (cfg.killers || []).forEach((k, idx) => {
+    const box = document.querySelector('[data-killer="' + (idx + 1) + '"]');
+    if (!box || !k || !k.name) return;
+    if (k.sprite) {
+      const face = document.createElement('span');
+      face.className = 'face';
+      face.setAttribute('aria-hidden', 'true');
+      const img = document.createElement('i');
+      img.style.backgroundImage = 'url("' + k.sprite + '")';
+      img.style.setProperty('--n', k.n);
+      img.style.setProperty('--i', k.i);
+      face.append(img);
+      box.append(face);
+    }
+    const text = document.createElement('span');
+    const small = document.createElement('small');
+    small.textContent = 'Маньяк';
+    const b = document.createElement('b');
+    b.textContent = k.name;
+    text.append(small, b);
+    box.append(text);
+  });
 
   function fill(n, names, next, rosters) {
     const list = document.querySelector('[data-stage="' + n + '"]');
@@ -348,12 +418,17 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
     list.textContent = '';
     const decided = next && next.length > 0;                    // следующий этап уже объявлен
     const through = new Set((next || []).map(s => s.toLowerCase()));
-    names.forEach(name => {
+    names.forEach((name, i) => {
       const li = document.createElement('li');
       li.className = 'team';
+      const pos = document.createElement('span');
+      pos.className = 'pos';
+      pos.setAttribute('aria-hidden', 'true');                  // номер и так читается из нумерованного списка
+      pos.textContent = i + 1;
       const span = document.createElement('span');
+      span.className = 'name';
       span.textContent = name;
-      li.append(span);
+      li.append(pos, span);
       if (decided) {
         if (through.has(name.toLowerCase())) {
           li.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" role="img" aria-label="прошла дальше"><use href="#i-heart"/></svg>');
@@ -390,12 +465,13 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
 
   function show(d) {
     state.hidden = true;
-    if (d.hidden || !Array.isArray(d.stage1)) { closed.hidden = false; stages.hidden = true; banner.hidden = true; return; }
+    if (d.hidden || !Array.isArray(d.stage1)) { closed.hidden = false; stages.hidden = true; banner.hidden = true; lead.hidden = true; return; }
     closed.hidden = true;
     fill(1, d.stage1 || [], d.stage2, d.rosters);
     fill(2, d.stage2 || [], d.stage3, d.rosters);
     fill(3, d.stage3 || [], null, d.rosters);
     stages.hidden = false;
+    lead.hidden = false;
     if (d.demo) {
       banner.innerHTML = '<b>Это пример.</b> Команды выдуманные — так страница будет выглядеть, когда в таблице появятся заявки и галочки.';
       banner.hidden = false;
@@ -412,6 +488,7 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
 
   async function load() {
     if (mode === 'demo') return show(DEMO);
+    if (mode === 'demo-start') return show(DEMO_START);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 25000);
     try {
@@ -432,7 +509,7 @@ h2 { margin: 0; font: 800 clamp(1.5rem, 5.5vw, 1.9rem)/1.15 var(--text); text-wr
   }
 
   load();
-  if (mode !== 'demo') setInterval(() => { if (!document.hidden) load(); }, 60000);   // во время турнира сетка обновляется сама
+  if (!/^demo/.test(mode)) setInterval(() => { if (!document.hidden) load(); }, 60000);   // во время турнира сетка обновляется сама
 })();
 </script>
 </body>
